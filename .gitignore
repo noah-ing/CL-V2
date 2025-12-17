@@ -1,0 +1,30 @@
+# Client data - do not commit
+Working Reports*/
+*.xlsx
+*.xls
+
+# Subprojects (separate repos)
+ConvertX/
+
+# Generated reports
+reports/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
