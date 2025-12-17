@@ -1,0 +1,84 @@
+================================================================================
+  QUICK START GUIDE - CirrusLine Billing Reports
+================================================================================
+
+WHAT THIS DOES:
+---------------
+Generates billing reports from your monthly Vitelity and SkySwitch CDR data,
+including:
+  - Call ratio (Interstate vs Intrastate %)
+  - CDR breakdown by customer
+  - Combined SkySwitch + Vitelity report
+  - Phone number counts
+  - Seat counts
+  - SMS usage
+
+
+SETUP (ONE TIME):
+-----------------
+1. Make sure Python 3.9+ is installed
+   - Download from: https://www.python.org/downloads/
+   - During install, CHECK "Add Python to PATH"
+
+2. Put these files in a folder (e.g., C:\Billing):
+   - billing_reports.py
+   - call_ratio.py
+   - run_billing.bat
+
+
+MONTHLY USAGE:
+--------------
+1. Download your monthly reports into a folder, e.g.:
+   "Working Reports 2025_11"
+
+   Files needed:
+   - http-XXXXXX.csv          (Vitelity CDR)
+   - phonenumbers__XXXXX.csv  (Phone number mapping)
+   - syneteks-XXXX.csv        (SMS - optional)
+   - Domain-Statistics-XXXX.xlsx (Seat counts - optional)
+   - CDR SS records-XX_XX.xlsx   (Master Excel - optional, for combined report)
+
+2. Double-click run_billing.bat
+
+3. If prompted, enter the path to your reports folder:
+   Example: C:\Users\Dean\Desktop\Working Reports 2025_11
+
+4. Reports are saved to the "reports" folder
+
+
+OUTPUT FILES:
+-------------
+  cdr_by_customer.csv         - Vitelity CDR by customer with call ratios
+  combined_cdr_by_customer.csv - Combined SkySwitch + Vitelity (if master xlsx provided)
+  phone_counts_by_customer.csv - Phone numbers per customer
+  seat_counts_by_customer.csv  - PBX seats per customer
+  sms_by_customer.csv          - SMS usage per customer
+  callerid_counts.csv          - CallerID lookup counts
+
+
+THE KEY NUMBER:
+---------------
+Look for "OVERALL CALL RATIO" or "COMBINED CALL RATIO" in the output:
+
+  +---------------------------------------+
+  |  COMBINED CALL RATIO                  |
+  +---------------------------------------+
+  |  Interstate:   40.17%                 |  <-- This is what you need
+  |  Intrastate:   59.83%                 |
+  +---------------------------------------+
+
+FCC Safe Harbor: 64.9% interstate / 35.1% intrastate
+
+
+TROUBLESHOOTING:
+----------------
+- "Python not found": Install Python and make sure to check "Add to PATH"
+- "File not found": Check file names match patterns (http-*.csv, etc.)
+- Wrong folder: Drag and drop folder onto run_billing.bat, or specify path
+
+
+QUESTIONS?
+----------
+Contact your administrator or refer to README.md for detailed documentation.
+
+================================================================================
