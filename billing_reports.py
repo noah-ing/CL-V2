@@ -29,6 +29,20 @@ VOICE_RATE_PER_MINUTE = 0.005  # $0.005 per minute
 SMS_RATE_PER_MESSAGE = 0.005   # $0.005 per message
 
 # ============================================================================
+# Phone Number Treatments - Non-billable (excluded from PVT PhoneNumbers)
+# These are fax machines, on-hold numbers, unassigned, etc.
+# ============================================================================
+NON_BILLABLE_TREATMENTS = {
+    'Available Number',  # Unassigned phone numbers
+    'FaxSFATA',          # Physical fax machines (SFATA)
+    'vFaxSFATA',         # Virtual fax SFATA
+    'iFax',              # Internet fax
+    'vFax',              # Virtual fax
+    'vOn-Hold',          # On-hold music numbers
+    'vOffNet',           # Off-network numbers
+}
+
+# ============================================================================
 # NPA (Area Code) to State mapping
 # ============================================================================
 NPA_TO_STATE = {
@@ -327,25 +341,62 @@ def generate_cdr_report(
 # ============================================================================
 # Report 2: Phone Number Count by Customer
 # ============================================================================
-def generate_phone_count_report(phonenumbers_csv: Path, output_file: Optional[Path] = None) -> dict:
-    """Generate phone number count by customer."""
-    counts = defaultdict(int)
+def generate_phone_count_report(
+    phonenumbers_csv: Path,
+    output_file: Optional[Path] = None,
+    excluded_file: Optional[Path] = None
+) -> tuple[dict, dict]:
+    """
+    Generate phone number count by customer, excluding non-billable phones.
+
+    Non-billable phones (fax, on-hold, unassigned) are tracked separately
+    and can be output to excluded_file for the InvOther report.
+
+    Returns:
+        Tuple of (billable_counts, excluded_counts) dicts
+    """
+    billable_counts = defaultdict(int)
+    excluded_counts = defaultdict(int)
+    excluded_rows = []
 
     with open(phonenumbers_csv, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row in reader:
             domain = row.get('Domain', '')
+            treatment = row.get('Treatment', '').strip()
             customer = get_customer_name(domain)
-            counts[customer] += 1
 
+            # Check if this is a non-billable treatment
+            is_excluded = treatment in NON_BILLABLE_TREATMENTS
+
+            # Also check for fax/hold keywords in treatment (catch-all)
+            treatment_lower = treatment.lower()
+            if 'fax' in treatment_lower or 'hold' in treatment_lower:
+                is_excluded = True
+
+            if is_excluded:
+                excluded_counts[customer] += 1
+                excluded_rows.append(row)
+            else:
+                billable_counts[customer] += 1
+
+    # Output billable phone counts
     if output_file:
         with open(output_file, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Customer', 'Phone Number Count'])
-            for customer, count in sorted(counts.items(), key=lambda x: x[1], reverse=True):
+            writer.writerow(['Customer', 'Billable Phone Count'])
+            for customer, count in sorted(billable_counts.items(), key=lambda x: x[1], reverse=True):
                 writer.writerow([customer, count])
 
-    return dict(counts)
+    # Output excluded phones (InvOther)
+    if excluded_file and excluded_rows:
+        with open(excluded_file, 'w', newline='') as f:
+            fieldnames = ['Phone Number', 'Domain', 'Treatment', 'Destination', 'Notes', 'Enable']
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+            writer.writeheader()
+            writer.writerows(excluded_rows)
+
+    return dict(billable_counts), dict(excluded_counts)
 
 
 # ============================================================================
@@ -897,11 +948,17 @@ def main():
     print(f"  Generated: cdr_by_customer.csv")
 
     print(f"\nGenerating phone count report...")
-    phone_counts = generate_phone_count_report(
+    phone_counts, excluded_counts = generate_phone_count_report(
         phonenumbers_file,
-        output_dir / "phone_counts_by_customer.csv"
+        output_dir / "phone_counts_by_customer.csv",
+        output_dir / "phone_excluded_invother.csv"
     )
-    print(f"  Generated: phone_counts_by_customer.csv")
+    print(f"  Generated: phone_counts_by_customer.csv (billable phones)")
+    total_billable = sum(phone_counts.values())
+    total_excluded = sum(excluded_counts.values())
+    if total_excluded > 0:
+        print(f"  Generated: phone_excluded_invother.csv ({total_excluded} non-billable phones)")
+    print(f"  Billable phones: {total_billable}, Excluded (fax/hold/unassigned): {total_excluded}")
 
     print(f"\nGenerating CallerID report...")
     callerid_counts = generate_callerid_report(

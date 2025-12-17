@@ -57,10 +57,26 @@ python3 billing_reports.py \
 |--------|-------------|
 | `cdr_by_customer.csv` | Vitelity CDR with interstate/intrastate breakdown + costs |
 | `combined_cdr_by_customer.csv` | Combined SkySwitch + Vitelity CDR with call ratios |
-| `phone_counts_by_customer.csv` | Phone number count per customer |
+| `phone_counts_by_customer.csv` | **Billable** phone numbers per customer (excludes fax/hold/unassigned) |
+| `phone_excluded_invother.csv` | Non-billable phones (fax, on-hold, unassigned) for InvOther |
 | `callerid_counts.csv` | CallerID lookup counts per number |
 | `seat_counts_by_customer.csv` | PBX Users (seats) per customer |
 | `sms_by_customer.csv` | SMS usage per customer |
+
+## Phone Number Filtering
+
+Phone numbers are automatically filtered based on the `Treatment` column:
+
+**Billable** (included in `phone_counts_by_customer.csv`):
+- `User` - Active phone users
+- `Voicemail` - Voicemail boxes
+- `Call Queue` - Call queue numbers
+- `Conference` - Conference bridges
+
+**Non-Billable** (excluded to `phone_excluded_invother.csv`):
+- `Available Number` - Unassigned numbers
+- `FaxSFATA`, `vFax`, `iFax`, `vFaxSFATA` - Fax machines
+- `vOn-Hold`, `vOffNet` - On-hold/special purpose numbers
 
 ## Input File Formats
 
