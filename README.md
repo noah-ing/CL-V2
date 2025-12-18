@@ -62,6 +62,7 @@ python3 billing_reports.py \
 | `callerid_counts.csv` | CallerID lookup counts per number |
 | `seat_counts_by_customer.csv` | PBX Users (seats) per customer |
 | `sms_by_customer.csv` | SMS usage per customer |
+| `adams_county_user_summary.csv` | Adams County User Summary pivot (dept × user type) |
 
 ## Phone Number Filtering
 

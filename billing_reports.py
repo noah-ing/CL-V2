@@ -858,6 +858,156 @@ def generate_seat_count_report(
 
 
 # ============================================================================
+# Report 7: Adams County User Summary (Pivot Table)
+# ============================================================================
+def generate_adams_county_report(
+    master_xlsx: Path,
+    output_file: Optional[Path] = None
+) -> dict:
+    """
+    Generate Adams County User Summary pivot table from Master Excel.
+
+    Extracts data from 'Copied user_export_AdamsCoIL' sheet (sheet10) and
+    creates a pivot table counting extensions by Department and UserType.
+
+    Args:
+        master_xlsx: Path to master Excel file (CDR SS records-xxx.xlsx)
+        output_file: Optional path to save pivot table as CSV
+
+    Returns:
+        Dict with pivot data: {dept: {user_type: count}}
+    """
+    import zipfile
+    import xml.etree.ElementTree as ET
+
+    ns = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
+
+    # Data structure for pivot
+    pivot_data = defaultdict(lambda: defaultdict(int))
+    user_types = ['u', 'nu', 'nb', 'vm only', 'faxata']
+
+    with zipfile.ZipFile(master_xlsx) as z:
+        # Get shared strings
+        try:
+            ss_xml = ET.parse(z.open('xl/sharedStrings.xml')).getroot()
+            strings = []
+            for si in ss_xml.findall('.//main:si', ns):
+                t_el = si.find('.//main:t', ns)
+                strings.append(t_el.text if t_el is not None else '')
+        except:
+            strings = []
+
+        # Try to find the Adams County user export sheet
+        # First check sheet10 (Copied user_export_AdamsCoIL)
+        sheet_found = False
+        for sheet_num in [10, 11]:  # Try Copied version first, then original
+            try:
+                sheet_xml = z.read(f'xl/worksheets/sheet{sheet_num}.xml')
+                root = ET.fromstring(sheet_xml)
+                rows = root.findall('.//main:row', ns)
+
+                if not rows:
+                    continue
+
+                # Check if this is the Adams County sheet by looking at header
+                header_row = rows[0]
+                has_dept = False
+                has_usertype = False
+
+                for cell in header_row.findall('main:c', ns):
+                    ref = cell.get('r')
+                    col = ''.join(c for c in ref if c.isalpha())
+                    cell_type = cell.get('t')
+                    val_el = cell.find('main:v', ns)
+                    val = val_el.text if val_el is not None else ''
+
+                    if cell_type == 's' and val and strings:
+                        idx = int(val)
+                        val = strings[idx] if idx < len(strings) else val
+
+                    if val.lower() == 'department':
+                        has_dept = True
+                    if val.lower() == 'usertype':
+                        has_usertype = True
+
+                if has_dept:
+                    sheet_found = True
+                    break
+            except:
+                continue
+
+        if not sheet_found:
+            print("    Warning: Could not find Adams County user export sheet")
+            return {}
+
+        # Process rows to build pivot
+        for row in rows[1:]:  # Skip header
+            row_data = {}
+            for cell in row.findall('main:c', ns):
+                ref = cell.get('r')
+                col = ''.join(c for c in ref if c.isalpha())
+                cell_type = cell.get('t')
+                val_el = cell.find('main:v', ns)
+                val = val_el.text if val_el is not None else ''
+
+                if cell_type == 's' and val and strings:
+                    idx = int(val)
+                    val = strings[idx] if idx < len(strings) else val
+
+                row_data[col] = val
+
+            # Department is column I, UserType is column AA
+            dept = row_data.get('I', '').strip()
+            user_type = row_data.get('AA', '').strip()
+
+            if dept:
+                pivot_data[dept][user_type] += 1
+
+    # Output CSV if requested
+    if output_file and pivot_data:
+        with open(output_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+
+            # Header row
+            writer.writerow(['Department'] + user_types + ['Grand Total'])
+
+            # Data rows sorted by department
+            grand_totals = defaultdict(int)
+            for dept in sorted(pivot_data.keys()):
+                row = [dept]
+                row_total = 0
+                for ut in user_types:
+                    count = pivot_data[dept].get(ut, 0)
+                    row.append(count if count > 0 else '')
+                    row_total += count
+                    grand_totals[ut] += count
+                row.append(row_total)
+                writer.writerow(row)
+
+            # Grand total row
+            total_row = ['Grand Total']
+            overall_total = 0
+            for ut in user_types:
+                total_row.append(grand_totals[ut])
+                overall_total += grand_totals[ut]
+            total_row.append(overall_total)
+            writer.writerow(total_row)
+
+            # Summary calculations
+            writer.writerow([])  # Empty row
+
+            # Lines Calculation (billable = u + vm only)
+            billable_users = grand_totals.get('u', 0) + grand_totals.get('vm only', 0)
+            writer.writerow(['Lines Calculation', '', '', '', billable_users])
+
+            # High Value for Month Users (total active)
+            active_users = grand_totals.get('u', 0) + grand_totals.get('nu', 0) + grand_totals.get('vm only', 0)
+            writer.writerow(['High Value for Month Users', '', '', '', active_users])
+
+    return dict(pivot_data)
+
+
+# ============================================================================
 # Main
 # ============================================================================
 def print_summary(customers: dict[str, CustomerStats]):
@@ -1028,6 +1178,38 @@ def main():
             print(f"  ║  Intrastate:  {total_intrastate/jurisdictional*100:6.2f}%               ║")
             print(f"  ╚═══════════════════════════════════════╝")
         print()
+
+        # Generate Adams County User Summary if data exists
+        print(f"  Generating Adams County User Summary...")
+        adams_pivot = generate_adams_county_report(
+            master_xlsx_file,
+            output_dir / "adams_county_user_summary.csv"
+        )
+        if adams_pivot:
+            print(f"  Generated: adams_county_user_summary.csv")
+
+            # Print Adams County summary
+            total_u = sum(d.get('u', 0) for d in adams_pivot.values())
+            total_nu = sum(d.get('nu', 0) for d in adams_pivot.values())
+            total_nb = sum(d.get('nb', 0) for d in adams_pivot.values())
+            total_vm = sum(d.get('vm only', 0) for d in adams_pivot.values())
+            total_fax = sum(d.get('faxata', 0) for d in adams_pivot.values())
+            total_ext = total_u + total_nu + total_nb + total_vm + total_fax
+
+            print(f"\n  ADAMS COUNTY USER SUMMARY")
+            print(f"  {'─' * 50}")
+            print(f"  {'User Type':<15} {'Count':>8}")
+            print(f"  {'─' * 50}")
+            print(f"  {'u (user)':<15} {total_u:>8,}")
+            print(f"  {'nu (not used)':<15} {total_nu:>8,}")
+            print(f"  {'nb (not billed)':<15} {total_nb:>8,}")
+            print(f"  {'vm only':<15} {total_vm:>8,}")
+            print(f"  {'faxata':<15} {total_fax:>8,}")
+            print(f"  {'─' * 50}")
+            print(f"  {'TOTAL':<15} {total_ext:>8,}")
+            print(f"  {'─' * 50}")
+            print(f"  Billable (u + vm only): {total_u + total_vm:,}")
+            print()
 
     elif master_xlsx_file:
         print(f"\nWarning: Master Excel file not found: {master_xlsx_file}")

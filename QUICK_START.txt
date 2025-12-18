@@ -48,16 +48,19 @@ MONTHLY USAGE:
 
 OUTPUT FILES:
 -------------
-  cdr_by_customer.csv           - Vitelity CDR by customer with call ratios
-  combined_cdr_by_customer.csv  - Combined SkySwitch + Vitelity (if master xlsx provided)
-  phone_counts_by_customer.csv  - BILLABLE phone numbers per customer
-  phone_excluded_invother.csv   - Non-billable phones (fax, on-hold, unassigned)
-  seat_counts_by_customer.csv   - PBX seats per customer
-  sms_by_customer.csv           - SMS usage per customer
-  callerid_counts.csv           - CallerID lookup counts
+  cdr_by_customer.csv            - Vitelity CDR by customer with call ratios
+  combined_cdr_by_customer.csv   - Combined SkySwitch + Vitelity (if master xlsx provided)
+  phone_counts_by_customer.csv   - BILLABLE phone numbers per customer
+  phone_excluded_invother.csv    - Non-billable phones (fax, on-hold, unassigned)
+  seat_counts_by_customer.csv    - PBX seats per customer
+  sms_by_customer.csv            - SMS usage per customer
+  callerid_counts.csv            - CallerID lookup counts
+  adams_county_user_summary.csv  - Adams County pivot (dept × user type)
 
-NOTE: Phone counts automatically exclude fax machines, on-hold numbers, and
-unassigned numbers. These are saved to phone_excluded_invother.csv for reference.
+NOTES:
+- Phone counts automatically exclude fax machines, on-hold numbers, and
+  unassigned numbers. These are saved to phone_excluded_invother.csv.
+- Adams County User Summary requires the Master Excel file (CDR SS records).
 
 
 THE KEY NUMBER:
