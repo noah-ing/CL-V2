@@ -1,6 +1,11 @@
 ================================================================================
-  QUICK START GUIDE - CirrusLine Billing Reports
+  QUICK START GUIDE - CirrusLine Billing Reports (V2)
 ================================================================================
+
+IMPORTANT:
+----------
+This tool does NOT modify your Master Excel file. It reads your data and
+generates standalone CSV reports. Your Excel workflow stays untouched.
 
 WHAT THIS DOES:
 ---------------

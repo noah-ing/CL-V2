@@ -1,6 +1,8 @@
-# Telecom Billing Automation
+# Telecom Billing Automation (V2)
 
-Automated billing report generator for CirrusLine/Syneteks telecom services. Processes CDR (Call Detail Records) from Vitelity and SkySwitch to generate billing reports with interstate/intrastate call ratios.
+Generates billing reports as standalone CSV files from your Vitelity and SkySwitch data.
+
+**Key difference from V1:** This tool does NOT modify your Master Excel file. It reads your data and outputs CSV reports you can use for billing. Your Excel workflow stays untouched.
 
 ## Features
 
