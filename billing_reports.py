@@ -1093,29 +1093,29 @@ def main():
     customers = generate_cdr_report(
         cdr_file,
         phone_mapping,
-        output_dir / "cdr_by_customer.csv"
+        output_dir / "cdr.csv"
     )
-    print(f"  Generated: cdr_by_customer.csv")
+    print(f"  Generated: cdr.csv")
 
     print(f"\nGenerating phone count report...")
     phone_counts, excluded_counts = generate_phone_count_report(
         phonenumbers_file,
-        output_dir / "phone_counts_by_customer.csv",
-        output_dir / "phone_excluded_invother.csv"
+        output_dir / "phones.csv",
+        output_dir / "phones_excl.csv"
     )
-    print(f"  Generated: phone_counts_by_customer.csv (billable phones)")
+    print(f"  Generated: phones.csv (billable phones)")
     total_billable = sum(phone_counts.values())
     total_excluded = sum(excluded_counts.values())
     if total_excluded > 0:
-        print(f"  Generated: phone_excluded_invother.csv ({total_excluded} non-billable phones)")
+        print(f"  Generated: phones_excl.csv ({total_excluded} non-billable phones)")
     print(f"  Billable phones: {total_billable}, Excluded (fax/hold/unassigned): {total_excluded}")
 
     print(f"\nGenerating CallerID report...")
     callerid_counts = generate_callerid_report(
         cdr_file,
-        output_dir / "callerid_counts.csv"
+        output_dir / "callerid.csv"
     )
-    print(f"  Generated: callerid_counts.csv")
+    print(f"  Generated: callerid.csv")
 
     # Generate SMS report if file provided
     sms_overall = None
@@ -1124,9 +1124,9 @@ def main():
         sms_customers, sms_overall = generate_sms_report(
             sms_file,
             phone_mapping,
-            output_dir / "sms_by_customer.csv"
+            output_dir / "sms.csv"
         )
-        print(f"  Generated: sms_by_customer.csv")
+        print(f"  Generated: sms.csv")
     elif sms_file:
         print(f"\nWarning: SMS file not found: {sms_file}")
 
@@ -1152,9 +1152,9 @@ def main():
             cdr_file,
             master_xlsx_file,
             phone_mapping,
-            output_dir / "combined_cdr_by_customer.csv"
+            output_dir / "cdr_combined.csv"
         )
-        print(f"  Generated: combined_cdr_by_customer.csv")
+        print(f"  Generated: cdr_combined.csv")
 
         # Print combined summary
         total_calls = sum(c.total_calls for c in combined_customers.values())
@@ -1183,10 +1183,10 @@ def main():
         print(f"  Generating Adams County User Summary...")
         adams_pivot = generate_adams_county_report(
             master_xlsx_file,
-            output_dir / "adams_county_user_summary.csv"
+            output_dir / "adams_co.csv"
         )
         if adams_pivot:
-            print(f"  Generated: adams_county_user_summary.csv")
+            print(f"  Generated: adams_co.csv")
 
             # Print Adams County summary
             total_u = sum(d.get('u', 0) for d in adams_pivot.values())
@@ -1220,9 +1220,9 @@ def main():
         print(f"\nProcessing Domain Statistics {domain_stats_file.name}...")
         seat_counts = generate_seat_count_report(
             domain_stats_file,
-            output_dir / "seat_counts_by_customer.csv"
+            output_dir / "seats.csv"
         )
-        print(f"  Generated: seat_counts_by_customer.csv")
+        print(f"  Generated: seats.csv")
 
         # Print seat count summary
         total_seats = sum(c['pbx_users'] for c in seat_counts.values())

@@ -57,14 +57,14 @@ python3 billing_reports.py \
 
 | Report | Description |
 |--------|-------------|
-| `cdr_by_customer.csv` | Vitelity CDR with interstate/intrastate breakdown + costs |
-| `combined_cdr_by_customer.csv` | Combined SkySwitch + Vitelity CDR with call ratios |
-| `phone_counts_by_customer.csv` | **Billable** phone numbers per customer (excludes fax/hold/unassigned) |
-| `phone_excluded_invother.csv` | Non-billable phones (fax, on-hold, unassigned) for InvOther |
-| `callerid_counts.csv` | CallerID lookup counts per number |
-| `seat_counts_by_customer.csv` | PBX Users (seats) per customer |
-| `sms_by_customer.csv` | SMS usage per customer |
-| `adams_county_user_summary.csv` | Adams County User Summary pivot (dept × user type) |
+| `cdr.csv` | Vitelity CDR with interstate/intrastate breakdown + costs |
+| `cdr_combined.csv` | Combined SkySwitch + Vitelity CDR with call ratios |
+| `phones.csv` | **Billable** phone numbers per customer (excludes fax/hold/unassigned) |
+| `phones_excl.csv` | Non-billable phones (fax, on-hold, unassigned) for InvOther |
+| `callerid.csv` | CallerID lookup counts per number |
+| `seats.csv` | PBX Users (seats) per customer |
+| `sms.csv` | SMS usage per customer |
+| `adams_co.csv` | Adams County User Summary pivot (dept × user type) |
 
 ## Phone Number Filtering
 
