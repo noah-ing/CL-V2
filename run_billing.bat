@@ -132,31 +132,41 @@ echo   Running Billing Reports...
 echo ============================================================
 echo.
 
-:: Build the command
-set "CMD=python billing_reports.py"
-set "CMD=!CMD! "!VITELITY_CDR!""
-set "CMD=!CMD! "!PHONE_NUMBERS!""
-set "CMD=!CMD! "!OUTPUT_DIR!""
+:: Change to script directory
+cd /d "%~dp0"
 
-if not "!SMS_FILE!"=="" (
-    set "CMD=!CMD! "!SMS_FILE!""
-) else (
-    set "CMD=!CMD! """
-)
-
-if not "!DOMAIN_STATS!"=="" (
-    set "CMD=!CMD! "!DOMAIN_STATS!""
-) else (
-    set "CMD=!CMD! """
-)
+:: Run Python directly with quoted paths (avoid complex command building)
+echo Running: python billing_reports.py ...
+echo.
 
 if not "!MASTER_XLSX!"=="" (
-    set "CMD=!CMD! "!MASTER_XLSX!""
+    if not "!DOMAIN_STATS!"=="" (
+        if not "!SMS_FILE!"=="" (
+            python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!" "!DOMAIN_STATS!" "!MASTER_XLSX!"
+        ) else (
+            python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "!DOMAIN_STATS!" "!MASTER_XLSX!"
+        )
+    ) else (
+        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "" "!MASTER_XLSX!"
+    )
+) else if not "!DOMAIN_STATS!"=="" (
+    if not "!SMS_FILE!"=="" (
+        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!" "!DOMAIN_STATS!"
+    ) else (
+        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "!DOMAIN_STATS!"
+    )
+) else if not "!SMS_FILE!"=="" (
+    python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!"
+) else (
+    python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!"
 )
 
-:: Run the command
-cd /d "%~dp0"
-!CMD!
+:: Check if Python ran successfully
+if errorlevel 1 (
+    echo.
+    echo ERROR: Python script failed. See error above.
+    echo.
+)
 
 echo.
 echo ============================================================
