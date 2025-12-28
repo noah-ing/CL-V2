@@ -43,6 +43,12 @@ MONTHLY USAGE:
    - Domain-Statistics-XXXX.xlsx (Seat counts - optional)
    - CDR SS records-XX_XX.xlsx   (Master Excel - optional, for combined report)
 
+   ZIP files are automatically extracted! Just put them in the folder:
+   - 20507_smsroute_*.zip
+   - 20507_smsusageexpandedcount_*.zip
+   - 20507_10dlc-billing_*.zip
+   - 20507_tendlccampaignphonenumbercount_*.zip
+
 2. Double-click run_billing.bat
 
 3. If prompted, enter the path to your reports folder:

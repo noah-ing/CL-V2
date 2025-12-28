@@ -81,6 +81,17 @@ Phone numbers are automatically filtered based on the `Treatment` column:
 - `FaxSFATA`, `vFax`, `iFax`, `vFaxSFATA` - Fax machines
 - `vOn-Hold`, `vOffNet` - On-hold/special purpose numbers
 
+## ZIP File Handling
+
+SkySwitch reports often come as ZIP files. The `run_billing.bat` script automatically extracts any ZIP files found in your reports folder before processing:
+
+- `20507_smsroute_*.zip`
+- `20507_smsusageexpandedcount_*.zip`
+- `20507_10dlc-billing_*.zip`
+- `20507_tendlccampaignphonenumbercount_*.zip`
+
+Just download the ZIP files to your Working Reports folder - no manual extraction needed.
+
 ## Input File Formats
 
 ### Vitelity CDR (CSV)

@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 echo.
 echo ============================================================
 echo   CirrusLine Telecom Billing Report Generator
-echo   v1.0 - December 2024
+echo   v1.1 - December 2024
 echo ============================================================
 echo.
 
@@ -48,6 +48,30 @@ if not exist "!REPORTS_FOLDER!" (
 :: Create output directory
 set "OUTPUT_DIR=%~dp0reports"
 if not exist "!OUTPUT_DIR!" mkdir "!OUTPUT_DIR!"
+
+echo.
+echo ============================================================
+echo   Checking for ZIP files to extract...
+echo ============================================================
+echo.
+
+:: Extract any ZIP files found in the reports folder
+:: This handles SkySwitch reports that come as ZIP files
+set "ZIP_COUNT=0"
+for %%f in ("!REPORTS_FOLDER!\*.zip") do (
+    echo   Extracting: %%~nxf
+    powershell -Command "Expand-Archive -Path '%%f' -DestinationPath '!REPORTS_FOLDER!' -Force" 2>nul
+    if !errorlevel! equ 0 (
+        set /a ZIP_COUNT+=1
+    ) else (
+        echo   Warning: Could not extract %%~nxf
+    )
+)
+
+if !ZIP_COUNT! gtr 0 (
+    echo.
+    echo   Extracted !ZIP_COUNT! ZIP file(s)
+)
 
 echo.
 echo Looking for input files...
