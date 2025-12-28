@@ -135,37 +135,15 @@ echo.
 :: Change to script directory
 cd /d "%~dp0"
 
-:: Run Python directly with quoted paths (avoid complex command building)
-echo Running: python billing_reports.py ...
-echo.
-
-if not "!MASTER_XLSX!"=="" (
-    if not "!DOMAIN_STATS!"=="" (
-        if not "!SMS_FILE!"=="" (
-            python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!" "!DOMAIN_STATS!" "!MASTER_XLSX!"
-        ) else (
-            python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "!DOMAIN_STATS!" "!MASTER_XLSX!"
-        )
-    ) else (
-        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "" "!MASTER_XLSX!"
-    )
-) else if not "!DOMAIN_STATS!"=="" (
-    if not "!SMS_FILE!"=="" (
-        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!" "!DOMAIN_STATS!"
-    ) else (
-        python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "" "!DOMAIN_STATS!"
-    )
-) else if not "!SMS_FILE!"=="" (
-    python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!"
-) else (
-    python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!"
-)
+:: Run Python with all arguments (Python handles empty strings gracefully)
+python billing_reports.py "!VITELITY_CDR!" "!PHONE_NUMBERS!" "!OUTPUT_DIR!" "!SMS_FILE!" "!DOMAIN_STATS!" "!MASTER_XLSX!"
 
 :: Check if Python ran successfully
 if errorlevel 1 (
     echo.
-    echo ERROR: Python script failed. See error above.
-    echo.
+    echo ERROR: Python script failed. See error message above.
+    pause
+    exit /b 1
 )
 
 echo.

@@ -1069,10 +1069,10 @@ def main():
 
     cdr_file = Path(sys.argv[1])
     phonenumbers_file = Path(sys.argv[2])
-    output_dir = Path(sys.argv[3]) if len(sys.argv) > 3 else Path("./reports")
-    sms_file = Path(sys.argv[4]) if len(sys.argv) > 4 else None
-    domain_stats_file = Path(sys.argv[5]) if len(sys.argv) > 5 else None
-    master_xlsx_file = Path(sys.argv[6]) if len(sys.argv) > 6 else None
+    output_dir = Path(sys.argv[3]) if len(sys.argv) > 3 and sys.argv[3] else Path("./reports")
+    sms_file = Path(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None
+    domain_stats_file = Path(sys.argv[5]) if len(sys.argv) > 5 and sys.argv[5] else None
+    master_xlsx_file = Path(sys.argv[6]) if len(sys.argv) > 6 and sys.argv[6] else None
 
     if not cdr_file.exists():
         print(f"Error: CDR file not found: {cdr_file}")
